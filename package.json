@@ -23,5 +23,8 @@
   "homepage": "https://github.com/bradynpoulsen/waterline-params",
   "dependencies": {
     "lodash": "^2.4.1"
+  },
+  "peerDependencies": {
+    "waterline": "^0.10.15"
   }
 }
