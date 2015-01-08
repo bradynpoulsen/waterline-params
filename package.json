@@ -1,26 +1,26 @@
 {
-  "name": "mongoose-params",
-  "version": "0.0.3",
-  "description": "implement rails-like strong parameters in mongoose",
+  "name": "waterline-params",
+  "version": "0.0.1",
+  "description": "implement rails-like strong parameters in waterline",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/bradynpoulsen/mongoose-params.git"
+    "url": "https://github.com/bradynpoulsen/waterline-params.git"
   },
   "keywords": [
-    "mongoose",
+    "waterline",
     "strong",
     "parameters"
   ],
   "author": "Bradyn Poulsen <bradyn@bradynpoulsen.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/bradynpoulsen/mongoose-params/issues"
+    "url": "https://github.com/bradynpoulsen/waterline-params/issues"
   },
-  "homepage": "https://github.com/bradynpoulsen/mongoose-params",
+  "homepage": "https://github.com/bradynpoulsen/waterline-params",
   "dependencies": {
     "lodash": "^2.4.1"
   }

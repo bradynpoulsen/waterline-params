@@ -2,15 +2,16 @@
 
 var _ = require('lodash');
 
-module.exports = (function(schema, opts){
+module.exports = (function(collection, opts){
+  var Model = collection.prototype;
+
   ///////////////////
   // Configuration //
   ///////////////////
 
   /** Merge Default Options **/
   var options = {
-    permitted: [],
-    overrideMethods: false
+    permitted: []
   };
   if(opts) _.assign(options, opts);
   if(_.isString(options.permitted) && options.permitted.indexOf(' ') >= 0)
@@ -38,7 +39,7 @@ module.exports = (function(schema, opts){
   // Instance Methods //
   //////////////////////
 
-  _.assign(schema.methods, {
+  _.assign(Model.attributes, {
     only: function(params){
       if(arguments.length > 1) params = arguments;
       return _.pick(this.toObject(), params);
@@ -88,18 +89,11 @@ module.exports = (function(schema, opts){
     }
   });
 
-  if(options.overrideMethods){
-    /** Override Document.update to #safeUpdate **/
-    _.assign(schema.methods, {
-      update: schema.methods.safeUpdate
-    });
-  }
-
   ////////////////////
   // Static Methods //
   ////////////////////
   
-  _.assign(schema.statics, {
+  _.assign(Model, {
     only: _.pick,
     except: _.omit,
 
@@ -117,14 +111,8 @@ module.exports = (function(schema, opts){
       var filtered = _.map(docs, function(source){
         return params(source, override);
       });
+
       return this.create(filtered, _.isFunction(override) ? override : done);
     }
   });
-
-  if(options.overrideMethods){
-    /** Override Model.create to #safeCreate **/
-    _.assign(schema.statics, {
-      create: schema.statics.safeCreate
-    });
-  }
 });

@@ -1,38 +1,38 @@
-# mongoose-params
+# waterline-params
 
-`mongoose-params` is designed to give you rails-like parameter helpers to secure your models.
+`waterline-params` is designed to give you rails-like parameter helpers to secure your models.
+
+Based on [mongoose-params](http://www.github.com/bradynpoulsen/mongoose-params) by Bradyn Poulsen.
 
 ## Installation
 
 ```
-$ npm install --save mongoose-params
+$ npm install --save waterline-params
 ```
 
 ## Synopsis
 
 ```js
-var params = require('mongoose-params');
+var Waterline = require('waterline');
 
-var UserSchema = new Schema({
-  name: String,
-  email: String,
-  ssn: String
+var User = Waterline.Collection.extend({
+  attributes: {
+    name: {
+      type: 'string'
+    },
+    email: {
+      type: 'string',
+      required: true
+    },
+    password: {
+      type: 'string',
+      required: true
+    }
+  }
 });
 
-UserSchema.plugin(params, {
-  permitted: 'name email',
-  overrideMethods: false
-});
-
-UserSchema.virtual('profile')
-  .get(function(){
-    return this.only('name', 'email');
-  });
-
-var bob = new User({
-  name: 'Bob',
-  email: 'bob@example.com',
-  ssn: '123-45-6789'
+require('waterline-params')(User, {
+  permitted: 'name email'
 });
 ```
 
@@ -43,7 +43,7 @@ var bob = new User({
 Return only `params` properties for the document
 
 ```js
-console.log(bob.profile); // {name: 'Bob', email: 'bob@example.com'}
+console.log(bob.only('name', 'email')); // {name: 'Bob', email: 'bob@example.com'}
 ```
 
 ### #except(params)
@@ -51,7 +51,7 @@ console.log(bob.profile); // {name: 'Bob', email: 'bob@example.com'}
 Return all properties except `params` for the document
 
 ```js
-console.log(bob.except('ssn')); // {name: 'Bob', email: 'bob@example.com'}
+console.log(bob.except('password')); // {name: 'Bob', email: 'bob@example.com'}
 ```
 
 ### #assign(data, [override])
@@ -61,9 +61,9 @@ Filter and apply changes to the document
 ```js
 bob.assign({
   name: 'Bob Perry',
-  ssn: '000-00-0000'
+  password: 'new password'
 });
-console.log(bob); // {name: 'Bob', email: 'bob@example.com', ssn: '123-45-6789'}
+console.log(bob); // {name: 'Bob Perry', email: 'bob@example.com', password: 'still the old password'}
 ```
 
 ### #merge(data, [override])
@@ -72,16 +72,14 @@ Same as `#assign` but returns a copy of the document that the changes were made 
 
 ### #safeUpdate(data, [override], [done])
 
-Update the document using only [permitted] properties. Use `override` to set properties not in [permitted].
+Update the document using only [permitted](#permitted-stringarraystring) properties. Use `override` to set properties not in [permitted](#permitted-stringarraystring).
 
 ```js
 bob.safeUpdate({
   email: 'bob@newEmail.com',
-  ssn: '000-00-0000'
-},{
-  role: 'admin'
+  password: 'new password'
 },function(err, updatedBob){
-  console.log(updatedBob); // {name: 'Bob', email: 'bob@newEmail.com', ssn: '123-45-6789', role: 'admin'}
+  console.log(updatedBob); // {name: 'Bob', email: 'bob@newEmail.com', password: 'still the old password'}
 });
 ```
 
@@ -97,17 +95,26 @@ See [Lodash: \_.omit](https://lodash.com/docs#omit).
 
 ### #safeCreate(data, [override], [done])
 
-Create document(s) using only [permitted] properties. Use `override` to set properties not in [permitted].
+Create document(s) using only [permitted](#permitted-stringarraystring) properties. Use `override` to set properties not in [permitted](#permitted-stringarraystring).
 
 ```js
-User.create({
+user.safeCreate({
   name: 'Bob',
   email: 'bob@example.com',
-  ssn: '123-45-6789'
-},{
-  role: 'admin'
-},function(err, bob){
-  console.log(bob); // {name: 'Bob', email: 'bob@example.com', role: 'admin'}
+  password: 'this password'
+}, function(err, bob){
+  console.log(err); // Error: `password` cannot be blank
+});
+
+// versus
+
+user.safeCreate({
+  name: 'Bob',
+  email: 'bob@example.com'
+}, {
+  password: 'this password'
+}, function(err, bob){
+  console.log(bob); // {name: 'Bob', email: 'bob@example.com', password: 'this password'}
 });
 ```
 
@@ -120,19 +127,16 @@ User.create({
 These both give the same result:
 
 ```js
-ThingSchema.plugin(require('mongoose-params'),{
+var params = require('waterline-params');
+
+params(Thing, {
   permitted: 'title description details'
 });
 
-ThingSchema.plugin(require('mongoose-params'),{
+params(Thing, {
   permitted: ['title', 'description', 'details']
 });
 ```
-
-### overrideMethods: {Boolean}
-
-This option will set the mongoose `Model.create` and `Document.update` methods
-to [#safeCreate](#safeCreate) and [#safeUpdate](#safeUpdate), respectively.
 
 ## License
 
